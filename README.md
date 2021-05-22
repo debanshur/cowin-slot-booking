@@ -17,3 +17,6 @@ Edit the `data.properties` file for custom settings
 |`FEE` | FREE,PAID | Cost of Vaccine |
 |`EMAIL` | "Any mail address" | Any email address to send OTP |
 |`PASSWORD` | "Email Password" | Email Password |
+
+## Run
+python main.py
