@@ -2,6 +2,10 @@
 Fully Automated Vaccine Slot Booking App on CoWIN.
 
 ## Setup
+```
+pip install -r requirements.txt
+```
+
 Edit the `data.properties` file for custom settings
 
 |Property | Value | Remark |
@@ -15,8 +19,11 @@ Edit the `data.properties` file for custom settings
 |`DOSE` | 1 | Dose Number. 1 or 2 |
 |`VACCINE` | COVISHIELD,COVAXIN,SPUTNIK | Vaccine Type Preference |
 |`FEE` | FREE,PAID | Cost of Vaccine |
+|`TYPE` | SCHEDULE | Can be SCHEDULE or RESCHEDULE based on your booking status |
 |`EMAIL` | "Any mail address" | Any email address to send OTP |
 |`PASSWORD` | "Email Password" | Email Password |
 
 ## Run
+```
 python main.py
+```
