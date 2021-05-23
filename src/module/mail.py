@@ -1,6 +1,6 @@
 import imaplib
 
-from constant import IMAP_URL
+from src.constant.constant import IMAP_URL
 
 
 class Mail:
@@ -9,8 +9,6 @@ class Mail:
         self.user = user
         self.password = password
         self.con = imaplib.IMAP4_SSL(IMAP_URL)
-
-        self.con.login(self.user, self.password)
 
     # Function to get email content part i.e its body part
     def get_body(self, msg):
@@ -51,6 +49,9 @@ class Mail:
 
     def logout(self):
         self.con.logout()
+
+    def login(self):
+        self.con.login(self.user, self.password)
 
     def re_login(self):
         self.con.logout()

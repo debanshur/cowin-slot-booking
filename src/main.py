@@ -2,13 +2,12 @@ from datetime import datetime
 
 import requests
 from jproperties import Properties
-import time
 
-from appointment import Appointment
-from captcha import Captcha
-from constant import ACTION, SECRET, URL_GET_BENEFICIARY, HEADER
-from mail import Mail
-from otp import Otp
+from src.module.appointment import Appointment
+from src.module.captcha import Captcha
+from src.constant.constant import ACTION, SECRET, URL_GET_BENEFICIARY, HEADER
+from src.module.mail import Mail
+from src.module.otp import Otp
 
 
 class CowinApp:
@@ -26,6 +25,8 @@ class CowinApp:
         self.password = ""
         self.token = ""
         self.fee_type = ""
+        self.book_type = ""
+        self.app_id = ""
 
         #  Read Config File
         self.read_properties()
@@ -35,7 +36,7 @@ class CowinApp:
 
     def read_properties(self):
         configs = Properties()
-        with open('data.properties', 'rb') as read_prop:
+        with open('config/config.properties', 'rb') as read_prop:
             configs.load(read_prop)
 
         self.age = configs["AGE"].data
@@ -53,9 +54,10 @@ class CowinApp:
         self.vaccine = vac.split(",")
         fee = str(configs["FEE"].data)
         self.fee_type = fee.split(",")
+        self.book_type = configs["TYPE"].data
 
     def get_existing_token(self):
-        with open("token.txt", "r") as text_file:
+        with open("data/token.txt", "r") as text_file:
             token = text_file.read()
         return token
 
@@ -67,6 +69,8 @@ class CowinApp:
         result = requests.get(url, headers=header)
         if result.ok:
             return True
+        else:
+            print("Token Auth Failed due to : " + str(result.status_code))
         return False
 
     def get_token(self):
@@ -75,25 +79,30 @@ class CowinApp:
         if self.validate_token(last_token):
             return last_token
 
+        self.mail.login()
         last_otp = self.mail.read_otp()
         txn_id = self.otp.generate_otp()
         new_otp = self.mail.read_otp()
 
-        count = 1
+        count = 0
         while last_otp == new_otp:
             print("Old OTP found : " + last_otp)
-            time.sleep(1)
+            # time.sleep(1)
             new_otp = self.mail.read_otp()
             count = count + 1
             if count == 10:
-                return None
+                self.otp.generate_otp()
+                self.mail.re_login()
+                count = 0
 
         print("New OTP received : " + new_otp)
+        self.mail.logout()
         token = self.otp.get_auth_token(txn_id, new_otp)
         return token
 
     def start(self):
         print(datetime.now())
+
         token = self.get_token()
 
         if token is None:
@@ -101,10 +110,16 @@ class CowinApp:
             return ACTION.RESTART
 
         self.token = token
-        with open("token.txt", "w") as text_file:
+        with open("data/token.txt", "w") as text_file:
             text_file.write(self.token)
 
         appointment = Appointment(self)
+
+        if self.book_type == "RESCHEDULE":
+            self.app_id = appointment.get_appointment_id()
+            if self.app_id is None:
+                return ACTION.RESTART
+
         while True:
             slot = appointment.get_slots()
 
@@ -119,11 +134,17 @@ class CowinApp:
                 if captcha_string is None:
                     return ACTION.RESTART
 
-                booking_res = appointment.book_slot(dose=self.dose,
-                                                    session_id=slot['session_id'],
-                                                    slot_time=slot['slot_time'],
-                                                    beneficiary_id=self.beneficiary,
-                                                    captcha=captcha_string)
+                if self.book_type == "RESCHEDULE":
+                    booking_res = appointment.reschedule_slot(app_id=self.app_id,
+                                                              session_id=slot['session_id'],
+                                                              slot_time=slot['slot_time'],
+                                                              captcha=captcha_string)
+                else:
+                    booking_res = appointment.schedule_slot(dose=self.dose,
+                                                            session_id=slot['session_id'],
+                                                            slot_time=slot['slot_time'],
+                                                            beneficiary_id=self.beneficiary,
+                                                            captcha=captcha_string)
                 print(booking_res)
                 if booking_res is None or booking_res["appointment_confirmation_no"] is None:
                     print("Booking failed")
@@ -136,6 +157,7 @@ if __name__ == '__main__':
 
     res = cowin.start()
     while res is ACTION.RESTART:
+        cowin = CowinApp()
         res = cowin.start()
 
     print("Thank you")

@@ -2,7 +2,7 @@ import hashlib
 import json
 import requests
 
-from constant import URL_GENERATE_OTP, HEADER, URL_VALIDATE_OTP
+from src.constant.constant import URL_GENERATE_OTP, HEADER, URL_VALIDATE_OTP
 
 
 class Otp:

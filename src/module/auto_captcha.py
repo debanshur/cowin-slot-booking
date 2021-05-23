@@ -3,7 +3,7 @@ import json
 import re
 import xml.etree.ElementTree as ET
 
-from constant import MODEL
+from src.constant.constant import MODEL
 
 
 class AutoCaptcha:

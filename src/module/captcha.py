@@ -1,8 +1,8 @@
 import re
 import requests
 
-from auto_captcha import AutoCaptcha
-from constant import URL_GET_CAPTCHA, HEADER
+from src.module.auto_captcha import AutoCaptcha
+from src.constant.constant import URL_GET_CAPTCHA, HEADER
 
 
 class Captcha:
@@ -33,10 +33,10 @@ class Captcha:
             return None
         svg = re.sub(r'<path d=.*?fill=\"none\"/>', '', svg)
 
-        with open("captcha.svg", "w") as text_file:
+        with open("../data/captcha.svg", "w") as text_file:
             text_file.write(svg)  # No use. Just for fun. Will remove if performance decreases
 
-        with open("captcha.xml", "w") as text_file:
+        with open("../data/captcha.xml", "w") as text_file:
             text_file.write(svg)
 
         # cap = input("Enter Captcha : ")

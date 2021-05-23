@@ -1,6 +1,6 @@
 import requests
 
-from constant import URL_GET_BENEFICIARY, HEADER
+from src.constant.constant import URL_GET_BENEFICIARY, HEADER
 
 
 class Account:

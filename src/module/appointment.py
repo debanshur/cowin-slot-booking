@@ -4,7 +4,7 @@ import time
 
 import requests
 
-from constant import URL_SLOT_SCHEDULE, HEADER, URL_SLOT_DISTRICT, ACTION
+from src.constant.constant import URL_SLOT_SCHEDULE, HEADER, URL_SLOT_DISTRICT, ACTION, URL_GET_BENEFICIARY, URL_SLOT_RESCHEDULE
 
 
 class Appointment:
@@ -36,13 +36,14 @@ class Appointment:
                     if result.ok:
                         check = 0
                         response_json = result.json()
+                        print(url)
                         print(response_json)
                         slot = self.parse_availability(response_json)
                         if slot is None:
                             continue
                         return slot
                     else:
-                        print("Get Slot Req failed!")
+                        print("Get Slot Req failed!" + str(result.status_code))
                         if check == 10:
                             return ACTION.RESTART
                         check = check + 1
@@ -78,7 +79,7 @@ class Appointment:
                         return slot
         return None
 
-    def book_slot(self, dose, session_id, slot_time, beneficiary_id,  captcha):
+    def schedule_slot(self, dose, session_id, slot_time, beneficiary_id,  captcha):
         print("Booking slot... ")
         url = URL_SLOT_SCHEDULE
         header = HEADER
@@ -97,5 +98,44 @@ class Appointment:
             response_json = result.json()
             return response_json
         else:
-            print("Booking slot Failed due to : " + str(result.status_code))
+            print("Booking slot Schedule Failed due to : " + str(result.status_code))
+            return None
+
+    def reschedule_slot(self, app_id, session_id, slot_time,  captcha):
+        print("Booking slot Reschedule... ")
+        url = URL_SLOT_RESCHEDULE
+        header = HEADER
+        header["Authorization"] = "Bearer " + self.cowin_app.token
+
+        data = {
+            "appointment_id": app_id,
+            "session_id": session_id,
+            "slot": slot_time,
+            "captcha": captcha
+        }
+
+        result = requests.post(url, data=json.dumps(data), headers=header)
+        if result.ok:
+            response_json = result.json()
+            return response_json
+        else:
+            print("Booking slot Reschedule Failed due to : " + str(result.status_code))
+            return None
+
+    def get_appointment_id(self):
+        print("Getting Appointment ID..")
+        url = URL_GET_BENEFICIARY
+        header = HEADER
+        header["Authorization"] = "Bearer " + self.cowin_app.token
+
+        result = requests.get(url, headers=header)
+        if result.ok:
+            response_json = result.json()
+            beneficiary = response_json['beneficiaries']
+            for b in beneficiary:
+                if b['beneficiary_reference_id'] in self.cowin_app.beneficiary:
+                    appointment_id = b['appointments'][0]['appointment_id']
+                    return appointment_id
+        else:
+            print("Get Beneficiary Failed due to : " + str(result.status_code))
             return None
