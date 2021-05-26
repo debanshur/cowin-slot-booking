@@ -1,7 +1,16 @@
 #IDEA
 .idea*
-src/data/
-src/config/
+module/data/
+
+#Text file
+*.txt
+
+#XML
+*.xml
+*.svg
+
+#Json
+*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
