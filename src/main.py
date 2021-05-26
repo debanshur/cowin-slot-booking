@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import time
 import requests
 from jproperties import Properties
 
@@ -113,6 +113,9 @@ class CowinApp:
         with open("data/token.txt", "w") as text_file:
             text_file.write(self.token)
 
+        with open("data/time.txt", "w") as text_file:
+            text_file.write(str(datetime.now().strftime("%b %d %Y %H:%M:%S")))
+
         appointment = Appointment(self)
 
         if self.book_type == "RESCHEDULE":
@@ -142,6 +145,7 @@ class CowinApp:
                 else:
                     booking_res = appointment.schedule_slot(dose=self.dose,
                                                             session_id=slot['session_id'],
+                                                            center_id=slot['center_id'],
                                                             slot_time=slot['slot_time'],
                                                             beneficiary_id=self.beneficiary,
                                                             captcha=captcha_string)
@@ -153,6 +157,7 @@ class CowinApp:
 
 
 if __name__ == '__main__':
+
     cowin = CowinApp()
 
     res = cowin.start()

@@ -6,13 +6,16 @@ URL_GET_CAPTCHA = "https://api.CoWIN.gov.in/api/v2/auth/getRecaptcha"
 URL_GET_BENEFICIARY = "https://api.CoWIN.gov.in/api/v2/appointment/beneficiaries"
 URL_SLOT_SCHEDULE = "https://api.CoWIN.gov.in/api/v2/appointment/schedule"
 URL_SLOT_RESCHEDULE = "https://api.demo.co-vin.in/api/v2/appointment/reschedule"
-URL_SLOT_DISTRICT = "https://api.CoWIN.gov.in/api/v2/appointment/sessions/findByDistrict?district_id={}&date={}"
+URL_SLOT_DISTRICT = "https://api.CoWIN.gov.in/api/v2/appointment/sessions/public/findByDistrict?district_id={}&date={}"
+#URL_SLOT_DISTRICT = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id={}&date={}"
 
-HEADER = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36",
+HEADER = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36 SECSSOBrowserChrome",
           "Content-Type": "application/json",
-          "Accept": "application/json",
+          "Accept": "application/json, text/plain, */*",
           "cache-control": "no-cache",
-          "pragma": "no-cache"
+          "pragma": "no-cache",
+          "origin": "https://selfregistration.cowin.gov.in"
+
           }
 
 IMAP_URL = 'imap.gmail.com'

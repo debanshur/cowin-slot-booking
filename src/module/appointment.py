@@ -23,6 +23,22 @@ class Appointment:
         while True:
             for curr_date in actual_dates:
                 time.sleep(1)
+
+                with open("data/time.txt", "r") as text_file:
+                    last_time = text_file.read()
+                    lt = datetime.datetime.strptime(last_time, "%b %d %Y %H:%M:%S")
+                    curr = datetime.datetime.strptime(datetime.datetime.now().strftime("%b %d %Y %H:%M:%S"), "%b %d %Y %H:%M:%S")
+
+                    diff = curr - lt
+                    if diff.seconds > 850:
+                        print("Token Expiry")
+                        with open("C:\\Users\\debanshu.r\\PycharmProjects\\CoWin-Slot\\src\\data\\token.txt",
+                                  "w") as text_file:
+                            text_file.write("abc")
+                        return ACTION.RESTART
+
+
+
                 for code in self.cowin_app.district_code:
                     url = URL_SLOT_DISTRICT.format(code, curr_date)
                     header = HEADER
@@ -31,6 +47,12 @@ class Appointment:
 
                     if int(result.status_code) == 401:
                         print("OTP expired")
+                        return ACTION.RESTART
+
+                    if int(result.status_code) == 403:
+                        print("Timeout by server")
+                        with open("C:\\Users\\debanshu.r\\PycharmProjects\\CoWin-Slot\\src\\data\\token.txt", "w") as text_file:
+                            text_file.write("abc")
                         return ACTION.RESTART
 
                     if result.ok:
@@ -57,7 +79,7 @@ class Appointment:
                 if int(res['available_capacity']) < len(self.cowin_app.beneficiary):
                     continue
 
-                if self.cowin_app.dose is "1":
+                if self.cowin_app.dose == "1":
                     av = res['available_capacity_dose1']
                 else:
                     av = res['available_capacity_dose2']
@@ -70,16 +92,18 @@ class Appointment:
 
                 if int(ag) <= int(self.cowin_app.age) and \
                     vc in self.cowin_app.vaccine and \
+                    res['center_id'] == 557647 and \
                     fe.upper() in self.cowin_app.fee_type:
                         print("Booking Slot \n" + str(res))
                         slot = {
                             'session_id': res['session_id'],
+                            'center_id': res['center_id'],
                             'slot_time': res['slots'][0]
                         }
                         return slot
         return None
 
-    def schedule_slot(self, dose, session_id, slot_time, beneficiary_id,  captcha):
+    def schedule_slot(self, dose, session_id, center_id, slot_time, beneficiary_id,  captcha):
         print("Booking slot... ")
         url = URL_SLOT_SCHEDULE
         header = HEADER
@@ -90,6 +114,7 @@ class Appointment:
             "session_id": session_id,
             "slot": slot_time,
             "beneficiaries": beneficiary_id,
+            "center_id" : center_id,
             "captcha": captcha
         }
 

@@ -33,13 +33,13 @@ class Captcha:
             return None
         svg = re.sub(r'<path d=.*?fill=\"none\"/>', '', svg)
 
-        with open("../data/captcha.svg", "w") as text_file:
+        with open("C:\\Users\\debanshu.r\\PycharmProjects\\CoWin-Slot\\src\\data\\captcha.svg", "w") as text_file:
             text_file.write(svg)  # No use. Just for fun. Will remove if performance decreases
 
-        with open("../data/captcha.xml", "w") as text_file:
+        with open("C:\\Users\\debanshu.r\\PycharmProjects\\CoWin-Slot\\src\\data\\captcha.xml", "w") as text_file:
             text_file.write(svg)
 
         # cap = input("Enter Captcha : ")
-        cap = self.auto.process_captcha("captcha.xml")
+        cap = self.auto.process_captcha("C:\\Users\\debanshu.r\\PycharmProjects\\CoWin-Slot\\src\\data\\captcha.xml")
         print("Captcha : " + cap)
         return cap
