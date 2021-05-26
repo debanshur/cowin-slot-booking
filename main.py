@@ -78,6 +78,8 @@ class CowinApp:
         if self.validate_token(last_token):
             return last_token
 
+        print("STRANGE... You should not see this log.. Token refresh not working!!!!!")
+
         self.mail.login()
         last_otp = self.mail.read_otp()
         txn_id = self.otp.generate_otp()

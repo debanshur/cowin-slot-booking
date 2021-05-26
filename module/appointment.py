@@ -28,16 +28,16 @@ class Appointment:
         while True:
             for curr_date in actual_dates:
                 time.sleep(1)
-                curr = datetime.datetime.strptime(datetime.datetime.now().strftime("%b %d %Y %H:%M:%S"), "%b %d %Y %H:%M:%S")
 
-                diff = curr - lt
-                if diff.seconds > 850:
-                    print("Token Expiry")
-                    with open(TOKEN_FILE, "w") as text_file:
-                        text_file.write("abc")
+                # TODO : Token Validity check. May be refactored
+                url = URL_GET_BENEFICIARY
+                header = HEADER
+                header["Authorization"] = "Bearer " + self.cowin_app.token
+
+                result = requests.get(url, headers=header)
+                if not result.ok:
+                    print("Token Auth Failed due to : " + str(result.status_code))
                     return ACTION.RESTART
-
-
 
                 for code in self.cowin_app.district_code:
                     url = URL_SLOT_DISTRICT.format(code, curr_date)
@@ -45,14 +45,8 @@ class Appointment:
                     header["Authorization"] = "Bearer " + self.cowin_app.token
                     result = requests.get(url, headers=header)
 
-                    if int(result.status_code) == 401:
-                        print("OTP expired")
-                        return ACTION.RESTART
-
-                    if int(result.status_code) == 403:
-                        print("Timeout by server")
-                        with open(TOKEN_FILE, "w") as text_file:
-                            text_file.write("abc")
+                    if result.status_code == 401 or result.status_code == 403:
+                        print("OTP expired / Timeout by Server : " + str(result.status_code))
                         return ACTION.RESTART
 
                     if result.ok:
@@ -90,18 +84,16 @@ class Appointment:
                 vc = res['vaccine']
                 fe = res['fee_type']
 
-                if res['center_id'] == 557647 or res['center_id'] == 711001:
-
-                    if int(ag) <= int(self.cowin_app.age) and \
-                        vc in self.cowin_app.vaccine and \
-                        fe.upper() in self.cowin_app.fee_type:
-                            print("Booking Slot \n" + str(res))
-                            slot = {
-                                'session_id': res['session_id'],
-                                'center_id': res['center_id'],
-                                'slot_time': res['slots'][0]
-                            }
-                            return slot
+                if int(ag) <= int(self.cowin_app.age) and \
+                    vc in self.cowin_app.vaccine and \
+                    fe.upper() in self.cowin_app.fee_type:
+                        print("Booking Slot \n" + str(res))
+                        slot = {
+                            'session_id': res['session_id'],
+                            'center_id': res['center_id'],
+                            'slot_time': res['slots'][0]
+                        }
+                        return slot
         return None
 
     def schedule_slot(self, dose, session_id, center_id, slot_time, beneficiary_id,  captcha):

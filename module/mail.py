@@ -57,3 +57,7 @@ class Mail:
         self.con.logout()
         self.con = imaplib.IMAP4_SSL(IMAP_URL)
         self.con.login(self.user, self.password)
+
+    def re_con(self):
+        self.con = imaplib.IMAP4_SSL(IMAP_URL)
+        self.con.login(self.user, self.password)

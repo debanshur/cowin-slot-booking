@@ -40,6 +40,6 @@ class Captcha:
             text_file.write(svg)
 
         # cap = input("Enter Captcha : ")
-        cap = self.auto.process_captcha("C:\\Users\\debanshu.r\\PycharmProjects\\CoWin-Slot\\src\\data\\captcha.xml")
+        cap = self.auto.process_captcha(CAPTCHA_XML_FILE)
         print("Captcha : " + cap)
         return cap
