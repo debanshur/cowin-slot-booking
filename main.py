@@ -134,6 +134,7 @@ class CowinApp:
             if slot is None:
                 print("Will retry")
             else:
+                self.token = self.get_existing_token()
                 captcha = Captcha(self.token)
                 captcha_string = captcha.decode_captcha()
                 if captcha_string is None:
@@ -156,6 +157,7 @@ class CowinApp:
                     print("Booking failed")
                 else:
                     exit()
+
 
 
 if __name__ == '__main__':

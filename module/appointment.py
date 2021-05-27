@@ -30,14 +30,14 @@ class Appointment:
                 time.sleep(1)
 
                 # TODO : Token Validity check. May be refactored
-                url = URL_GET_BENEFICIARY
-                header = HEADER
-                header["Authorization"] = "Bearer " + self.cowin_app.token
-
-                result = requests.get(url, headers=header)
-                if not result.ok:
-                    print("Token Auth Failed due to : " + str(result.status_code))
-                    return ACTION.RESTART
+                # url = URL_GET_BENEFICIARY
+                # header = HEADER
+                # header["Authorization"] = "Bearer " + self.cowin_app.token
+                #
+                # result = requests.get(url, headers=header)
+                # if not result.ok:
+                #     print("Token Auth Failed due to : " + str(result.status_code))
+                #     return ACTION.RESTART
 
                 for code in self.cowin_app.district_code:
                     url = URL_SLOT_DISTRICT.format(code, curr_date)
@@ -52,6 +52,7 @@ class Appointment:
                     if result.ok:
                         check = 0
                         response_json = result.json()
+                        print(datetime.datetime.now().strftime("%b %d %Y %H:%M:%S"))
                         print(url)
                         print(response_json)
                         slot = self.parse_availability(response_json)
@@ -84,16 +85,18 @@ class Appointment:
                 vc = res['vaccine']
                 fe = res['fee_type']
 
-                if int(ag) <= int(self.cowin_app.age) and \
-                    vc in self.cowin_app.vaccine and \
-                    fe.upper() in self.cowin_app.fee_type:
-                        print("Booking Slot \n" + str(res))
-                        slot = {
-                            'session_id': res['session_id'],
-                            'center_id': res['center_id'],
-                            'slot_time': res['slots'][0]
-                        }
-                        return slot
+                if res['center_id'] == 557647 or res['center_id'] == 711001:
+
+                    if int(ag) <= int(self.cowin_app.age) and \
+                        vc in self.cowin_app.vaccine and \
+                        fe.upper() in self.cowin_app.fee_type:
+                            print("Booking Slot \n" + str(res))
+                            slot = {
+                                'session_id': res['session_id'],
+                                'center_id': res['center_id'],
+                                'slot_time': res['slots'][0]
+                            }
+                            return slot
         return None
 
     def schedule_slot(self, dose, session_id, center_id, slot_time, beneficiary_id,  captcha):

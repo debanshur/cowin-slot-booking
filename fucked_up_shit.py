@@ -1,9 +1,10 @@
 import time
 from datetime import datetime
 
+import requests
 from jproperties import Properties
 
-from constant.constant import TOKEN_FILE, TIME_FILE, SECRET, CONFIG_FILE
+from constant.constant import TOKEN_FILE, TIME_FILE, SECRET, CONFIG_FILE, URL_GET_BENEFICIARY, HEADER
 from module.mail import Mail
 from module.otp import Otp
 
@@ -30,10 +31,29 @@ class TokenRefresh:
         self.email = configs["EMAIL"].data
         self.password = configs["PASSWORD"].data
 
+    def validate_token(self):
+        with open(TOKEN_FILE, "r") as text_file:
+            token = text_file.read()
+
+        url = URL_GET_BENEFICIARY
+        header = HEADER
+        header["Authorization"] = "Bearer " + token
+
+        result = requests.get(url, headers=header)
+        if result.ok:
+            return True
+        else:
+            print("Invalid Token : " + str(result.status_code))
+        return False
+
     def refresh(self):
         with open(TIME_FILE, "r") as text_file:
             last_time = text_file.read()
             lt = datetime.strptime(last_time, "%b %d %Y %H:%M:%S")
+
+        valid = False
+        if self.validate_token():
+            valid = True
 
         self.mail.login()
 
@@ -41,10 +61,11 @@ class TokenRefresh:
 
         while True:
             time.sleep(10)
-            print("Waiting.....")
             curr = datetime.strptime(datetime.now().strftime("%b %d %Y %H:%M:%S"), "%b %d %Y %H:%M:%S")
+            print("Waiting..... " + str(curr))
+
             diff = curr - lt
-            if diff.seconds > 700:
+            if diff.seconds > 700 or valid is False:
                 print("Token Soon to Expire, Getting new")
                 self.mail.re_login()
 
@@ -74,6 +95,7 @@ class TokenRefresh:
                     text_file.write(str(datetime.now().strftime("%b %d %Y %H:%M:%S")))
 
                 lt = datetime.strptime(datetime.now().strftime("%b %d %Y %H:%M:%S"), "%b %d %Y %H:%M:%S")
+                valid = True
 
 
 token_refresh = TokenRefresh()
