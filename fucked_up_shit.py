@@ -86,7 +86,12 @@ class TokenRefresh:
 
                 print("New OTP received : " + new_otp)
 
+                print("Waiting..... " + str(datetime.now().strftime("%b %d %Y %H:%M:%S")))
                 token = self.otp.get_auth_token(txn_id, new_otp)
+
+                if token is None:
+                    valid = False
+                    continue
 
                 with open(TOKEN_FILE, "w") as text_file:
                     text_file.write(token)

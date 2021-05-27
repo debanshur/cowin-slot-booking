@@ -43,7 +43,7 @@ class Mail:
                     content = str(sent[1], 'utf-8')
                     data = str(content)
                     msg_body = data.split('$D$')
-                    otp = msg_body[1].split()[6][: -1]
+                    otp = msg_body[1].split(".")[0].split()[-1]
                     print("OTP Received from mail : " + otp)
                     return otp
 
