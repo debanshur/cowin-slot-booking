@@ -85,18 +85,16 @@ class Appointment:
                 vc = res['vaccine']
                 fe = res['fee_type']
 
-                if res['center_id'] == 557647 or res['center_id'] == 711001:
-
-                    if int(ag) <= int(self.cowin_app.age) and \
-                        vc in self.cowin_app.vaccine and \
-                        fe.upper() in self.cowin_app.fee_type:
-                            print("Booking Slot \n" + str(res))
-                            slot = {
-                                'session_id': res['session_id'],
-                                'center_id': res['center_id'],
-                                'slot_time': res['slots'][0]
-                            }
-                            return slot
+                if int(ag) <= int(self.cowin_app.age) and \
+                    vc in self.cowin_app.vaccine and \
+                    fe.upper() in self.cowin_app.fee_type:
+                        print("Booking Slot \n" + str(res))
+                        slot = {
+                            'session_id': res['session_id'],
+                            'center_id': res['center_id'],
+                            'slot_time': res['slots'][0]
+                        }
+                        return slot
         return None
 
     def schedule_slot(self, dose, session_id, center_id, slot_time, beneficiary_id,  captcha):
