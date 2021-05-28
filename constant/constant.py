@@ -7,6 +7,7 @@ URL_GET_BENEFICIARY = "https://api.CoWIN.gov.in/api/v2/appointment/beneficiaries
 URL_SLOT_SCHEDULE = "https://api.CoWIN.gov.in/api/v2/appointment/schedule"
 URL_SLOT_RESCHEDULE = "https://api.demo.co-vin.in/api/v2/appointment/reschedule"
 URL_SLOT_DISTRICT = "https://api.CoWIN.gov.in/api/v2/appointment/sessions/public/findByDistrict?district_id={}&date={}"
+URL_SLOT_PINCODE = "https://api.CoWIN.gov.in/api/v2/appointment/sessions/public/findByPin?pincode={}&date={}"
 #URL_SLOT_DISTRICT = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id={}&date={}"
 
 HEADER = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36 SECSSOBrowserChrome",

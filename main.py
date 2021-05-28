@@ -4,7 +4,8 @@ from jproperties import Properties
 
 from module.appointment import Appointment
 from module.captcha import Captcha
-from constant.constant import ACTION, SECRET, URL_GET_BENEFICIARY, HEADER, TOKEN_FILE, TIME_FILE, CONFIG_FILE
+from constant.constant import ACTION, SECRET, URL_GET_BENEFICIARY, HEADER, TOKEN_FILE, TIME_FILE, CONFIG_FILE, \
+    URL_SLOT_DISTRICT, URL_SLOT_PINCODE
 from module.mail import Mail
 from module.otp import Otp
 
@@ -15,6 +16,7 @@ class CowinApp:
         self.age = 0
         self.num_days = 0
         self.district_code = []
+        self.pincode = []
         self.mobile = ""
         self.dose = ""
         self.beneficiary = ""
@@ -26,6 +28,7 @@ class CowinApp:
         self.fee_type = ""
         self.book_type = ""
         self.app_id = ""
+        self.search_type = ""
 
         #  Read Config File
         self.read_properties()
@@ -40,8 +43,6 @@ class CowinApp:
 
         self.age = configs["AGE"].data
         self.num_days = int(configs["TOTAL_DAYS"].data)
-        code = str(configs["DISTRICT_CODE"].data)
-        self.district_code = code.split(",")
         self.mobile = configs["MOBILE"].data
         self.email = configs["EMAIL"].data
         self.password = configs["PASSWORD"].data
@@ -54,6 +55,19 @@ class CowinApp:
         fee = str(configs["FEE"].data)
         self.fee_type = fee.split(",")
         self.book_type = configs["TYPE"].data
+
+        d_code = str(configs["DISTRICT_CODE"].data)
+        self.district_code = d_code.split(",")
+        p_code = str(configs["PINCODE"].data)
+        self.pincode = p_code.split(",")
+
+        if (not d_code and not p_code) or (d_code and p_code):
+            print("Invalid Config for District / Pin Code. Either both present or both empty.")
+            exit()
+        if d_code:
+            self.search_type = "DISTRICT"
+        else:
+            self.search_type = "PINCODE"
 
     def get_existing_token(self):
         with open(TOKEN_FILE, "r") as text_file:

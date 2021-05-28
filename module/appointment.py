@@ -5,7 +5,7 @@ import time
 import requests
 
 from constant.constant import URL_SLOT_SCHEDULE, HEADER, URL_SLOT_DISTRICT, ACTION, URL_GET_BENEFICIARY, \
-    URL_SLOT_RESCHEDULE, TOKEN_FILE, TIME_FILE
+    URL_SLOT_RESCHEDULE, TOKEN_FILE, TIME_FILE, URL_SLOT_PINCODE
 
 
 class Appointment:
@@ -25,6 +25,13 @@ class Appointment:
             last_time = text_file.read()
             lt = datetime.datetime.strptime(last_time, "%b %d %Y %H:%M:%S")
 
+        if self.cowin_app.search_type == "DISTRICT":
+            search_codes = self.cowin_app.district_code
+            search_url = URL_SLOT_DISTRICT
+        else:
+            search_codes = self.cowin_app.pincode
+            search_url = URL_SLOT_PINCODE
+
         while True:
             for curr_date in actual_dates:
                 time.sleep(1)
@@ -39,8 +46,8 @@ class Appointment:
                 #     print("Token Auth Failed due to : " + str(result.status_code))
                 #     return ACTION.RESTART
 
-                for code in self.cowin_app.district_code:
-                    url = URL_SLOT_DISTRICT.format(code, curr_date)
+                for code in search_codes:
+                    url = search_url.format(code, curr_date)
                     header = HEADER
                     header["Authorization"] = "Bearer " + self.cowin_app.token
                     result = requests.get(url, headers=header)
