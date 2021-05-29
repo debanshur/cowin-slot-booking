@@ -1,6 +1,7 @@
 #IDEA
 .idea*
-module/data/
+data/
+config/
 
 #Text file
 *.txt

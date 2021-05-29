@@ -43,7 +43,7 @@ class Mail:
                     content = str(sent[1], 'utf-8')
                     data = str(content)
                     msg_body = data.split('$D$')
-                    otp = msg_body[1].split()[6][: -1]
+                    otp = msg_body[1].split(".")[0].split()[-1]
                     print("OTP Received from mail : " + otp)
                     return otp
 
@@ -55,5 +55,9 @@ class Mail:
 
     def re_login(self):
         self.con.logout()
+        self.con = imaplib.IMAP4_SSL(IMAP_URL)
+        self.con.login(self.user, self.password)
+
+    def re_con(self):
         self.con = imaplib.IMAP4_SSL(IMAP_URL)
         self.con.login(self.user, self.password)

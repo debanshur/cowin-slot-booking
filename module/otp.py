@@ -37,6 +37,8 @@ class Otp:
             response_json = result.json()
             if 'token' in response_json:
                 return response_json['token']
+        else:
+            print("OTP Validation failed : " + str(result.status_code))
         return None
 
     def get_auth_token(self, txn_id, user_otp):

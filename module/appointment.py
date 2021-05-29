@@ -5,7 +5,7 @@ import time
 import requests
 
 from constant.constant import URL_SLOT_SCHEDULE, HEADER, URL_SLOT_DISTRICT, ACTION, URL_GET_BENEFICIARY, \
-    URL_SLOT_RESCHEDULE, TOKEN_FILE, TIME_FILE
+    URL_SLOT_RESCHEDULE, TOKEN_FILE, TIME_FILE, URL_SLOT_PINCODE
 
 
 class Appointment:
@@ -25,39 +25,41 @@ class Appointment:
             last_time = text_file.read()
             lt = datetime.datetime.strptime(last_time, "%b %d %Y %H:%M:%S")
 
+        if self.cowin_app.search_type == "DISTRICT":
+            search_codes = self.cowin_app.district_code
+            search_url = URL_SLOT_DISTRICT
+        else:
+            search_codes = self.cowin_app.pincode
+            search_url = URL_SLOT_PINCODE
+
         while True:
             for curr_date in actual_dates:
                 time.sleep(1)
-                curr = datetime.datetime.strptime(datetime.datetime.now().strftime("%b %d %Y %H:%M:%S"), "%b %d %Y %H:%M:%S")
 
-                diff = curr - lt
-                if diff.seconds > 850:
-                    print("Token Expiry")
-                    with open(TOKEN_FILE, "w") as text_file:
-                        text_file.write("abc")
-                    return ACTION.RESTART
+                # TODO : Token Validity check. May be refactored
+                # url = URL_GET_BENEFICIARY
+                # header = HEADER
+                # header["Authorization"] = "Bearer " + self.cowin_app.token
+                #
+                # result = requests.get(url, headers=header)
+                # if not result.ok:
+                #     print("Token Auth Failed due to : " + str(result.status_code))
+                #     return ACTION.RESTART
 
-
-
-                for code in self.cowin_app.district_code:
-                    url = URL_SLOT_DISTRICT.format(code, curr_date)
+                for code in search_codes:
+                    url = search_url.format(code, curr_date)
                     header = HEADER
                     header["Authorization"] = "Bearer " + self.cowin_app.token
                     result = requests.get(url, headers=header)
 
-                    if int(result.status_code) == 401:
-                        print("OTP expired")
-                        return ACTION.RESTART
-
-                    if int(result.status_code) == 403:
-                        print("Timeout by server")
-                        with open(TOKEN_FILE, "w") as text_file:
-                            text_file.write("abc")
+                    if result.status_code == 401 or result.status_code == 403:
+                        print("OTP expired / Timeout by Server : " + str(result.status_code))
                         return ACTION.RESTART
 
                     if result.ok:
                         check = 0
                         response_json = result.json()
+                        print(datetime.datetime.now().strftime("%b %d %Y %H:%M:%S"))
                         print(url)
                         print(response_json)
                         slot = self.parse_availability(response_json)
@@ -90,18 +92,16 @@ class Appointment:
                 vc = res['vaccine']
                 fe = res['fee_type']
 
-                if res['center_id'] == 557647 or res['center_id'] == 711001:
-
-                    if int(ag) <= int(self.cowin_app.age) and \
-                        vc in self.cowin_app.vaccine and \
-                        fe.upper() in self.cowin_app.fee_type:
-                            print("Booking Slot \n" + str(res))
-                            slot = {
-                                'session_id': res['session_id'],
-                                'center_id': res['center_id'],
-                                'slot_time': res['slots'][0]
-                            }
-                            return slot
+                if int(ag) <= int(self.cowin_app.age) and \
+                    vc in self.cowin_app.vaccine and \
+                    fe.upper() in self.cowin_app.fee_type:
+                        print("Booking Slot \n" + str(res))
+                        slot = {
+                            'session_id': res['session_id'],
+                            'center_id': res['center_id'],
+                            'slot_time': res['slots'][0]
+                        }
+                        return slot
         return None
 
     def schedule_slot(self, dose, session_id, center_id, slot_time, beneficiary_id,  captcha):
@@ -142,6 +142,8 @@ class Appointment:
 
         result = requests.post(url, data=json.dumps(data), headers=header)
         if result.ok:
+            if result.status_code != 200:
+                return result
             response_json = result.json()
             return response_json
         else:
@@ -155,13 +157,14 @@ class Appointment:
         header["Authorization"] = "Bearer " + self.cowin_app.token
 
         result = requests.get(url, headers=header)
+        appointment_id_list = []
         if result.ok:
             response_json = result.json()
             beneficiary = response_json['beneficiaries']
             for b in beneficiary:
                 if b['beneficiary_reference_id'] in self.cowin_app.beneficiary:
-                    appointment_id = b['appointments'][0]['appointment_id']
-                    return appointment_id
+                    appointment_id_list.append(b['appointments'][0]['appointment_id'])
+            return appointment_id_list
         else:
             print("Get Beneficiary Failed due to : " + str(result.status_code))
             return None
