@@ -157,13 +157,14 @@ class Appointment:
         header["Authorization"] = "Bearer " + self.cowin_app.token
 
         result = requests.get(url, headers=header)
+        appointment_id_list = []
         if result.ok:
             response_json = result.json()
             beneficiary = response_json['beneficiaries']
             for b in beneficiary:
                 if b['beneficiary_reference_id'] in self.cowin_app.beneficiary:
-                    appointment_id = b['appointments'][0]['appointment_id']
-                    return appointment_id
+                    appointment_id_list.append(b['appointments'][0]['appointment_id'])
+            return appointment_id_list
         else:
             print("Get Beneficiary Failed due to : " + str(result.status_code))
             return None

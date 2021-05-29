@@ -27,7 +27,7 @@ class CowinApp:
         self.token = ""
         self.fee_type = ""
         self.book_type = ""
-        self.app_id = ""
+        self.app_id_list = []
         self.search_type = ""
 
         #  Read Config File
@@ -135,8 +135,8 @@ class CowinApp:
         appointment = Appointment(self)
 
         if self.book_type == "RESCHEDULE":
-            self.app_id = appointment.get_appointment_id()
-            if self.app_id is None:
+            self.app_id_list = appointment.get_appointment_id()
+            if len(self.app_id_list) == 0:
                 return ACTION.RESTART
 
         while True:
@@ -155,10 +155,24 @@ class CowinApp:
                     return ACTION.RESTART
 
                 if self.book_type == "RESCHEDULE":
-                    booking_res = appointment.reschedule_slot(app_id=self.app_id,
-                                                              session_id=slot['session_id'],
-                                                              slot_time=slot['slot_time'],
-                                                              captcha=captcha_string)
+                    counter = 0
+                    for app_id in self.app_id_list:
+                        booking_res = appointment.reschedule_slot(app_id=app_id,
+                                                                  session_id=slot['session_id'],
+                                                                  slot_time=slot['slot_time'],
+                                                                  captcha=captcha_string)
+                        if booking_res.status_code == 204:
+                            print("Booking Success for : " + app_id)
+                            counter = counter + 1
+
+                    if counter == len(self.app_id_list) :
+                        print("All Beneficiaries Rescheduling Success. Confirmation in UI")
+                    else:
+                        # TODO : Implement retry for only failed beneficiary
+                        print("Something failed. Please check manually.")
+
+                    exit()
+
                 else:
                     booking_res = appointment.schedule_slot(dose=self.dose,
                                                             session_id=slot['session_id'],
@@ -166,14 +180,12 @@ class CowinApp:
                                                             slot_time=slot['slot_time'],
                                                             beneficiary_id=self.beneficiary,
                                                             captcha=captcha_string)
-                    if booking_res.status_code == 204:
-                        print("Booking Success. Confirmation in UI")
+
+                    print(booking_res)
+                    if booking_res is None or booking_res["appointment_confirmation_no"] is None:
+                        print("Booking failed")
+                    else:
                         exit()
-                print(booking_res)
-                if booking_res is None or booking_res["appointment_confirmation_no"] is None:
-                    print("Booking failed")
-                else:
-                    exit()
 
 
 
