@@ -142,6 +142,8 @@ class Appointment:
 
         result = requests.post(url, data=json.dumps(data), headers=header)
         if result.ok:
+            if result.status_code != 200:
+                return result
             response_json = result.json()
             return response_json
         else:

@@ -166,6 +166,9 @@ class CowinApp:
                                                             slot_time=slot['slot_time'],
                                                             beneficiary_id=self.beneficiary,
                                                             captcha=captcha_string)
+                    if booking_res.status_code == 204:
+                        print("Booking Success. Confirmation in UI")
+                        exit()
                 print(booking_res)
                 if booking_res is None or booking_res["appointment_confirmation_no"] is None:
                     print("Booking failed")
