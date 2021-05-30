@@ -4,9 +4,8 @@ from jproperties import Properties
 
 from module.appointment import Appointment
 from module.captcha import Captcha
-from constant.constant import ACTION, SECRET, URL_GET_BENEFICIARY, HEADER, TOKEN_FILE, TIME_FILE, CONFIG_FILE, \
-    URL_SLOT_DISTRICT, URL_SLOT_PINCODE
-from module.mail import Mail
+from constant.constant import ACTION, SECRET, URL_GET_BENEFICIARY, HEADER, TOKEN_FILE, TIME_FILE, CONFIG_FILE
+from module.kvdb import KVDB
 from module.otp import Otp
 
 
@@ -22,8 +21,6 @@ class CowinApp:
         self.beneficiary = ""
         self.start_date = datetime.today().strftime("%d-%m-%Y")
         self.vaccine = []
-        self.email = ""
-        self.password = ""
         self.token = ""
         self.fee_type = ""
         self.book_type = ""
@@ -34,7 +31,7 @@ class CowinApp:
         self.read_properties()
 
         self.otp = Otp(self.mobile, SECRET)
-        self.mail = Mail(self.email, self.password, self.mobile)
+        self.kvdb = KVDB(self.mobile)
 
     def read_properties(self):
         configs = Properties()
@@ -44,8 +41,6 @@ class CowinApp:
         self.age = configs["AGE"].data
         self.num_days = int(configs["TOTAL_DAYS"].data)
         self.mobile = configs["MOBILE"].data
-        self.email = configs["EMAIL"].data
-        self.password = configs["PASSWORD"].data
         self.dose = configs["DOSE"].data
         ref_id = str(configs["REF_ID"].data)
         self.beneficiary = ref_id.split(",")
@@ -94,24 +89,22 @@ class CowinApp:
 
         print("STRANGE... You should not see this log.. Token refresh not working!!!!!")
 
-        self.mail.login()
-        last_otp = self.mail.read_otp()
+        last_otp = self.kvdb.get_otp()
         txn_id = self.otp.generate_otp()
-        new_otp = self.mail.read_otp()
+        new_otp = self.kvdb.get_otp()
 
         count = 0
         while last_otp == new_otp:
             print("Old OTP found : " + last_otp)
             # time.sleep(1)
-            new_otp = self.mail.read_otp()
+            new_otp = self.kvdb.get_otp()
             count = count + 1
             if count == 10:
                 self.otp.generate_otp()
-                self.mail.re_login()
                 count = 0
 
         print("New OTP received : " + new_otp)
-        self.mail.logout()
+
         token = self.otp.get_auth_token(txn_id, new_otp)
 
         with open(TOKEN_FILE, "w") as text_file:

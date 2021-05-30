@@ -12,6 +12,7 @@ Edit the `data.properties` file for custom settings
 |--- | --- | --- |
 |`AGE` | 50 | Minimum Age |
 |`DISTRICT_CODE` | 100,301,505 | List of District Code |
+|`PINCODE` | 560048,723121 | List of PinCode |
 |`START_DATE` | 23-05-2021 | Starting Date for Search |
 |`TOTAL_DAYS` | 10 | Total days to search from `START_DATE` |
 |`MOBILE` | 7001978442 | Mobile number for OTP |
@@ -20,10 +21,9 @@ Edit the `data.properties` file for custom settings
 |`VACCINE` | COVISHIELD,COVAXIN,SPUTNIK | Vaccine Type Preference |
 |`FEE` | FREE,PAID | Cost of Vaccine |
 |`TYPE` | SCHEDULE | Can be SCHEDULE or RESCHEDULE based on your booking status |
-|`EMAIL` | "Any mail address" | Any email address to send OTP |
-|`PASSWORD` | "Email Password" | Email Password |
 
 ## Run
 ```
+python good_boy.py
 python main.py
 ```

@@ -5,10 +5,11 @@ import requests
 from jproperties import Properties
 
 from constant.constant import CONFIG_FILE, SECRET, TOKEN_FILE, URL_GET_BENEFICIARY, HEADER, TIME_FILE, KVDB_BUCKET
+from module.kvdb import KVDB
 from module.otp import Otp
 
 
-class KVDB:
+class TokenRefresh:
     def __init__(self):
         self.mobile = ""
         #  Read Config File
@@ -38,18 +39,8 @@ class KVDB:
             print("Invalid Token : " + str(result.status_code))
         return False
 
-    def get_otp(self, mobile):
-        url = "https://kvdb.io/{}/{}"
-        uuu = url.format(KVDB_BUCKET,mobile)
-
-        result = requests.get(uuu)
-
-        if result.ok:
-            return result.text
-        else:
-            return "0"
-
     def refresh(self):
+        kvdb = KVDB(self.mobile)
         with open(TIME_FILE, "r") as text_file:
             last_time = text_file.read()
             lt = datetime.strptime(last_time, "%b %d %Y %H:%M:%S")
@@ -69,15 +60,15 @@ class KVDB:
             if diff.seconds > 850 or valid is False:
                 print("Token Soon to Expire, Getting new")
 
-                last_otp = self.get_otp(self.mobile)
+                last_otp = kvdb.get_otp()
                 txn_id = self.otp.generate_otp()
-                new_otp = self.get_otp(self.mobile)
+                new_otp = kvdb.get_otp()
 
                 count = 0
                 while last_otp == new_otp:
                     print("Old OTP found : " + last_otp)
                     # time.sleep(1)
-                    new_otp = self.get_otp(self.mobile)
+                    new_otp = kvdb.get_otp()
                     count = count + 1
                     if count == 10:
                         self.otp.generate_otp()
@@ -102,5 +93,5 @@ class KVDB:
                 valid = True
 
 
-kvdb = KVDB()
-kvdb.refresh()
+token_refresh = TokenRefresh()
+token_refresh.refresh()
