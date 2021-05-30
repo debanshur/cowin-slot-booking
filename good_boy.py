@@ -66,7 +66,7 @@ class KVDB:
             print("Waiting..... " + str(curr))
 
             diff = curr - lt
-            if diff.seconds > 10 or valid is False:
+            if diff.seconds > 850 or valid is False:
                 print("Token Soon to Expire, Getting new")
 
                 last_otp = self.get_otp(self.mobile)
