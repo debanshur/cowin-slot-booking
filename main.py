@@ -147,6 +147,7 @@ class CowinApp:
                 if captcha_string is None:
                     return ACTION.RESTART
 
+                print(datetime.now())
                 if self.book_type == "RESCHEDULE":
                     counter = 0
                     for app_id in self.app_id_list:

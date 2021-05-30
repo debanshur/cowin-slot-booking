@@ -47,6 +47,7 @@ class TokenRefresh:
 
         valid = False
         if self.validate_token():
+            print("Re-Using Existing Valid token...")
             valid = True
 
         # TODO : Add Exception handling. Loop should never break
@@ -57,7 +58,7 @@ class TokenRefresh:
             print("Waiting..... " + str(curr))
 
             diff = curr - lt
-            if diff.seconds > 850 or valid is False:
+            if diff.seconds > 800 or valid is False:
                 print("Token Soon to Expire, Getting new")
 
                 last_otp = kvdb.get_otp()
