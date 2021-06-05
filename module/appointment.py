@@ -34,7 +34,7 @@ class Appointment:
 
         while True:
             for curr_date in actual_dates:
-                time.sleep(1)
+                time.sleep(0.5)
 
                 # TODO : Token Validity check. May be refactored
                 # url = URL_GET_BENEFICIARY
@@ -49,7 +49,8 @@ class Appointment:
                 for code in search_codes:
                     url = search_url.format(code, curr_date)
                     header = HEADER
-                    header["Authorization"] = "Bearer " + self.cowin_app.token
+                    # Not Required for public api
+                    #header["Authorization"] = "Bearer " + self.cowin_app.token
                     result = requests.get(url, headers=header)
 
                     if result.status_code == 401 or result.status_code == 403:
@@ -63,6 +64,7 @@ class Appointment:
                         print(url)
                         print(response_json)
                         slot = self.parse_availability(response_json)
+
                         if slot is None:
                             continue
                         return slot
@@ -92,7 +94,19 @@ class Appointment:
                 vc = res['vaccine']
                 fe = res['fee_type']
 
-                if int(ag) <= int(self.cowin_app.age) and \
+                age_criteria = True
+                if int(self.cowin_app.age) >= 45:
+                    if int(ag) >= 45:
+                        age_criteria = True
+                    else :
+                        age_criteria = False
+                else:
+                    if int(ag) >= 18 and int(ag) < 45:
+                        age_criteria = True
+                    else :
+                        age_criteria = False
+
+                if age_criteria and \
                     vc in self.cowin_app.vaccine and \
                     fe.upper() in self.cowin_app.fee_type:
                         print("Booking Slot \n" + str(res))
@@ -101,6 +115,7 @@ class Appointment:
                             'center_id': res['center_id'],
                             'slot_time': res['slots'][0]
                         }
+                        #print("\n--------------------------------------")
                         return slot
         return None
 

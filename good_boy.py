@@ -58,7 +58,7 @@ class TokenRefresh:
             print("Waiting..... " + str(curr))
 
             diff = curr - lt
-            if diff.seconds > 800 or valid is False:
+            if diff.seconds > 600 or valid is False:
                 print("Token Soon to Expire, Getting new")
 
                 last_otp = kvdb.get_otp()
