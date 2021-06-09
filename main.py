@@ -115,10 +115,35 @@ class CowinApp:
 
         return token
 
+    def get_token_forcefully(self):
+
+        print("GETTING TOKEN FORCE!!!!!")
+
+        last_otp = self.kvdb.get_otp()
+        txn_id = self.otp.generate_otp()
+        new_otp = self.kvdb.get_otp()
+
+        count = 0
+        while last_otp == new_otp:
+            print("Old OTP found : " + last_otp)
+            # time.sleep(1)
+            new_otp = self.kvdb.get_otp()
+            count = count + 1
+            if count == 10:
+                self.otp.generate_otp()
+                count = 0
+
+        print("New OTP received : " + new_otp)
+
+        token = self.otp.get_auth_token(txn_id, new_otp)
+        return token
+
     def start(self):
         print(datetime.now())
 
-        token = self.get_token()
+        # Disabling Token Generation
+        #token = self.get_token()
+        token = "Something Random"
 
         if token is None:
             print("OTP Failed")
@@ -141,11 +166,15 @@ class CowinApp:
             if slot is None:
                 print("Will retry")
             else:
-                self.token = self.get_existing_token()
-                captcha = Captcha(self.token)
-                captcha_string = captcha.decode_captcha()
-                if captcha_string is None:
-                    return ACTION.RESTART
+                # Only Req OTP when slot is available
+                self.token = self.get_token_forcefully()
+                # self.token = self.get_existing_token()
+
+                # Disabling Captcha
+                # captcha = Captcha(self.token)
+                # captcha_string = captcha.decode_captcha()
+                # if captcha_string is None:
+                #     return ACTION.RESTART
 
                 print(datetime.now())
                 if self.book_type == "RESCHEDULE":
@@ -153,8 +182,7 @@ class CowinApp:
                     for app_id in self.app_id_list:
                         booking_res = appointment.reschedule_slot(app_id=app_id,
                                                                   session_id=slot['session_id'],
-                                                                  slot_time=slot['slot_time'],
-                                                                  captcha=captcha_string)
+                                                                  slot_time=slot['slot_time'])
                         if booking_res.status_code == 204:
                             print("Booking Success for : " + app_id)
                             counter = counter + 1
@@ -172,15 +200,13 @@ class CowinApp:
                                                             session_id=slot['session_id'],
                                                             center_id=slot['center_id'],
                                                             slot_time=slot['slot_time'],
-                                                            beneficiary_id=self.beneficiary,
-                                                            captcha=captcha_string)
+                                                            beneficiary_id=self.beneficiary)
 
                     print(booking_res)
                     if booking_res is None or booking_res["appointment_confirmation_no"] is None:
                         print("Booking failed")
                     else:
                         exit()
-
 
 
 if __name__ == '__main__':

@@ -119,7 +119,7 @@ class Appointment:
                         return slot
         return None
 
-    def schedule_slot(self, dose, session_id, center_id, slot_time, beneficiary_id,  captcha):
+    def schedule_slot(self, dose, session_id, center_id, slot_time, beneficiary_id):
         print("Booking slot... ")
         url = URL_SLOT_SCHEDULE
         header = HEADER
@@ -130,8 +130,7 @@ class Appointment:
             "session_id": session_id,
             "slot": slot_time,
             "beneficiaries": beneficiary_id,
-            "center_id" : center_id,
-            "captcha": captcha
+            "center_id" : center_id
         }
 
         result = requests.post(url, data=json.dumps(data), headers=header)
@@ -142,7 +141,7 @@ class Appointment:
             print("Booking slot Schedule Failed due to : " + str(result.status_code))
             return None
 
-    def reschedule_slot(self, app_id, session_id, slot_time,  captcha):
+    def reschedule_slot(self, app_id, session_id, slot_time):
         print("Booking slot Reschedule... ")
         url = URL_SLOT_RESCHEDULE
         header = HEADER
@@ -151,8 +150,7 @@ class Appointment:
         data = {
             "appointment_id": app_id,
             "session_id": session_id,
-            "slot": slot_time,
-            "captcha": captcha
+            "slot": slot_time
         }
 
         result = requests.post(url, data=json.dumps(data), headers=header)
