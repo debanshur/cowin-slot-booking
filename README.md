@@ -6,7 +6,7 @@ Fully Automated Vaccine Slot Booking App on CoWIN.
 pip install -r requirements.txt
 ```
 
-Edit the `data.properties` file for custom settings
+Edit the `config.properties` file for custom settings
 
 |Property | Value | Remark |
 |--- | --- | --- |
